@@ -16,10 +16,30 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.2.1/css/all.css">
     <!-- AOS plugin -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
+  
+<style>
+.sun {
+transition: opacity 0.5s ease;
+opacity: 1;
+pointer-events: none; 
+z-index: -3;
+}
+#procedure .airplane {
+  width: 10em;
+  top:10%;
+  left:10%;
+  z-index: 6;
+  transition: transform 0.1s linear;
+}
+
+
+ 
+</style>
     
   </head>
   <body class="position-relative">
+    <!-- the sun effect -->
+     <img src="./images/assets/sun.png" alt="" class="position-absolute sun" style="width:800px; top:13%; left:0%;">
     <!-- whole page decoration absolute item -->
      <?php require_once("./page_deco.php") ?>
 
@@ -33,7 +53,7 @@
 
     </section>
     <section id="productview" class="p-5 pt-1" data-aos="zoom-in-up">
-        <div class="w-100 d-flex justify-content-center mb-3" style="font-size: 20px;">優惠商品</div>
+        <div class="w-100 d-flex justify-content-center mb-3 mt-3" style="font-size: 20px;"><h1><strong>優惠商品</strong></h1></div>
         <div class="scrollwrapper position-relative">
 
         <!-- navigation -->
@@ -76,7 +96,7 @@
             <?php } ?>      
           </div>
         </div>
-        <div class="w-100 d-flex justify-content-center mt-3" style="font-size: 20px;">瞭解更多</div>
+
     </section>
     <section id="news">
        <div class="row">
@@ -87,8 +107,8 @@
             </div>
             <div class="col-md-12 d-flex">
               <div class="col-md-2" style="font-size: 16px;  border-bottom: dotted 1px black;">BBC</div>
-              <div class="col-md-7" style="font-size: 16px;  border-bottom: dotted 1px black; ">澳洲總理脫光光遊街</div>
-              <div class="col-md-3" style="font-size: 16px;  border-bottom: dotted 1px black; ">日期：04/12/2025</div>
+              <div class="col-md-7" style="font-size: 16px;  border-bottom: dotted 1px black; ">美國牛肉將開放進口澳洲</div>
+              <div class="col-md-3" style="font-size: 16px;  border-bottom: dotted 1px black; ">日期：10/12/2025</div>
             </div>
             <div class="col-md-12 d-flex">
               <div class="col-md-2" style="font-size: 16px;  border-bottom: dotted 1px black;">ABC</div>
@@ -107,20 +127,21 @@
           <div class="col-md-4">
             <img src="./images/assets/shipment1.png" class="img-fluid" alt="">
           </div>
-          <div class="col-md-4">
+          <div class="col-md-3">
             <img src="./images/assets/aboutus.svg" class="img-fluid" alt="" style="height:600px;">
           </div>
-          <div class="col-md-4 d-flex flex-column justify-content-center align-items-center">
-            <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Animi earum inventore sit repudiandae placeat amet esse, impedit autem ratione deserunt maiores eius officiis at sunt eveniet sequi. Ducimus, beatae laboriosam?</p>
+          <div class="col-md-5 d-flex flex-column justify-content-center align-items-center">
+            <p>澳洲地大物博，產品品質衛生安全把關，對於東西的製造流程和品管的監控都體現在於他們對於工安的要求上，對於品質的要求他們有他們的堅持，選購在澳洲的產品也選購了對生活的要求</p>
             <button class="btn btn-warning shadow">關於我們</button>
           </div>
         </div>
       </section>
-      <section id="procedure">
-        <div class="position-relative">
-          <img src="./images/assets/orderprocess.png" class="img-fluid" style="width: 100%;" alt="">
-          <button class="position-absolute btn btn-warning  shadow fw-bolder" style="z-index:5; width:150px;height:50px; left:50%; bottom:20%; font-size:1.2em ">點我了解</button>
-        </div>
+<section id="procedure">
+  <div class="position-relative">
+    <img src="./images/assets/airplane.svg" alt=""  class="airplane position-absolute">
+    <img src="./images/assets/orderprocess.png" class="img-fluid" style="width: 100%;" alt="">
+    <button class="position-absolute btn btn-warning  shadow fw-bolder" style="z-index:5; width:150px;height:50px; left:50%; bottom:20%; font-size:1.2em ">點我了解</button>
+  </div>
         
 </section>
 <section id="footer" >
@@ -228,6 +249,37 @@ document.getElementById("chatToggle").addEventListener("click", function() {
   const panel = document.getElementById("chatPanel");
   panel.style.display = panel.style.display === "block" ? "none" : "block";
 });
+
+//the sun amination when scroll
+$(window).on('scroll', function() {
+  const scrollTop = $(this).scrollTop();
+  const winHeight = $(window).height();
+  const docHeight = $(document).height() - winHeight;
+
+  /*Sun Animation */
+  const scrollPercent = scrollTop / docHeight;
+  const sunOpacity = 1 - scrollPercent * 0.9;
+  $('.sun').css({ opacity: sunOpacity });
+
+  /*Airplane Animation */
+  const section = $('#procedure');
+  if (section.length) { // ensure section exists
+    const sectionTop = section.offset().top;
+    const sectionHeight = section.outerHeight();
+    let progress = (scrollTop+winHeight-sectionTop)/sectionHeight;
+    progress=Math.min(Math.max(progress,0),1)
+
+  if (progress > 0 && progress <= 1) {
+    const xMove = progress * 70; // move right
+    const yMove = progress * 30; // move down linearly
+    $('.airplane').css({
+      transform: `translate(${xMove}vw, ${yMove}vh) rotate(${progress * 40 - 20}deg)`
+    });
+  }
+  }
+});
+
+
 </script>
 
 
