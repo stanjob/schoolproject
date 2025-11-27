@@ -12,7 +12,7 @@
     <div class="chat-toggle" id="chatToggle">
     <i class="fa-solid fa-comments me-1"></i><span style="font-size: 1em;">聯絡我們</span>
     </div>
-    <div class="chat-panel shadow-lg" id="chatPanel">
+    <div class="chat-panel shadow-lg" id="chatPanel" style="display:none;">
     <h5 class="mb-3 text-center">聯絡我們</h5>
     <div class="d-flex flex-column align-items-center">
         <a href="https://line.me/ti/p/xxxx" target="_blank" class="btn btn-success mb-2 w-75">

@@ -126,7 +126,7 @@ try{
                 </div>
               </div>
               <div class="row">
-                <div class="col-8 offset-2">
+                <div class="col-8 offset-2 pb-5">
                   <form action="member_profile.php" method="POST" name="profile" id="profile">
                     <div class="mb-4">
                       <label for="email" class="form-label mb-2">會員信箱</label>
@@ -165,7 +165,7 @@ try{
                       <label for="fileToUpload" class="form-label">會員頭像：</label>
                       <input type="file" name="fileToUpload" id="fileToUpload" class="form-control" title="請上傳圖片" accept="image/x-png,image/jpeg,image/git,image/jpg"/>
                       
-                      <button class="btn btn-danger mt-3" id="uploadForm" name="uploadForm">開始上傳</button>
+                      <button class="btn btn-warning mt-3" id="uploadForm" name="uploadForm">開始上傳</button>
   
                       <!-- bootstrap progress bar -->
                        <div id="progress-div01" class="progress" style="width:100%;display:none;">
@@ -176,7 +176,18 @@ try{
   
                        <input type="hidden" name="uploadname" id="uploadname" value=""/>
                        <img src="" alt="photo" name="showimg" id="showimg" style="display:none;" class="img-fluid">
+
                     </div>
+<!-- Show existing member photo -->
+<?php
+$photo = ($row['imgname'] == "" || $row['imgname'] == "avatar.svg") 
+         ? "avatar.svg" 
+         : $row['imgname'];
+?>
+<img src="uploads/<?php echo $photo; ?>" 
+     id="showimg" 
+     class="img-fluid mt-3" 
+     style="max-width:200px; <?php echo ($row['imgname'] ? '' : 'display:none;'); ?>">
                     <div class="input-group mb-3">
                     <div class="input-group">
                       <input type="hidden" name="captcha" id="captcha" value="">
@@ -187,14 +198,47 @@ try{
                     </div>
                     <input type="text" name="recaptcha" id="recaptcha" class="form-control" placeholder="請輸入驗證碼">
                     <input type="hidden" name="formct" id="formct" value="update">
-                    <div class="input-group mb-3 mt-3">
-                      <button type="submit" class="btn btn-success btn-lg">更新資料</button>
-                    </div>
+                
+                      <button type="submit" class="btn btn-success me-2 mt-3">更新資料</button>
+                      <button type="button" class="btn btn-danger text-white me-2 mt-3"  data-bs-toggle="modal" data-bs-target="#exampleModal">變更會員密碼</button>
+           
   
                   </form>
                 </div>
               </div>
             </div>
+
+<!-- Modal for password change -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel"><i class="fas fa-user-look me-2"></i> 會員密碼變更頁面</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="changePW" id="changePW" name="changePW">
+          <div class="mb-3">
+            <label for="PWOld" class="form-label">請輸入舊密碼</label>
+            <input type="password" class="form-control" id="PWOld" name="PWOld" placeholder="Current Password" v-model="PWOld">
+          </div>
+          <div class="mb-3">
+            <label for="PWNew1" class="form-label">請輸入新密碼</label>
+            <input type="password" class="form-control" id="PWNew1" name="PWNew1" placeholder="New Password" v-model="PWNew1">
+          </div>
+          <div class="mb-3">
+            <label for="PWNew2" class="form-label">請再確認新密碼</label>
+            <input type="password" class="form-control" id="PWNew2" name="PWNew2" placeholder="Vertify Password" v-model="PWNew2">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button id="mClose" name="mClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">離開</button>
+        <button type="button" class="btn btn-primary" onclick="savePW();">儲存密碼</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
              
@@ -369,7 +413,85 @@ document.getElementById("chatToggle").addEventListener("click", function() {
         equalTo:'驗證碼需相同！',
       },
     },
+    
   });
+  $("#changePW").validate({
+    errorClass:"text-danger", 
+    rules: {
+        PWOld: { required: true },
+        PWNew1: { required: true, minlength: 6 },
+        PWNew2: { required: true, equalTo: "#PWNew1" }
+    },
+    messages: {
+        PWOld: { required: "請輸入舊密碼" },
+        PWNew1: {
+            required: "請輸入新密碼",
+            minlength: "新密碼至少 6 個字元"
+        },
+        PWNew2: {
+            required: "請再次輸入新密碼",
+            equalTo: "兩次輸入的新密碼不相同"
+        }
+    }
+});
+</script>
+<script>
+  // jQuery version of savePW()
+function savePW() {
+
+    // Validate change password form
+    let valid = $("#changePW").valid();
+
+    if (valid) {
+
+        $.ajax({
+            url: "reqchangePW.php",
+            type: "GET",
+            data: {
+                emailid: "<?php echo $_SESSION['emailid']; ?>", // PHP session email
+                PWNew1: MD5($("#PWNew1").val())
+            },
+            success: function(res) {
+                let data = {};
+
+                // If response is JSON string → convert
+                try {
+                    data = typeof res === "string" ? JSON.parse(res) : res;
+                } catch (e) {
+                    alert("Server response error");
+                    return;
+                }
+
+                if (data.c === true) {
+
+                    // Reset form validation
+                    $("#changePW").validate().resetForm();
+
+                    // Clear fields
+                    $("#PWOld").val("");
+                    $("#PWNew1").val("");
+                    $("#PWNew2").val("");
+
+                    // Close modal
+                    $("#mClose").click();
+
+                    alert(data.m);
+                    setTimeout(function() {
+                        $("#exampleModal").modal("hide");
+                    }, 100);
+                } else {
+                    alert(data.m || "變更密碼失敗");
+                }
+            },
+            error: function(err) {
+                alert("AJAX ERROR: " + err.statusText);
+            }
+        });
+
+    }
+}
+
+
 </script>
 
 
